@@ -1,9 +1,6 @@
 name: Run Pytests
 
 on:
-  push:
-    branches:
-      - crawl
   pull_request:
     branches:
       - main
