@@ -21,19 +21,18 @@ ecr_repositories = [
 
 github_oidc_provider = {
   url = "https://token.actions.githubusercontent.com"
-  client_id_list = ["sts.amazonaws.com"]
-  thumbprint_list = ["9e99a48a9960b14926bb7f3b02e22da2b0ab7280"]
+  client_id_list = [ "sts.amazonaws.com" ]
+  thumbprint_list = [
+    "9e99a48a9960b14926bb7f3b02e22da2b0ab7280",
+    "74f3a68f16524f15424927704c9506f55a9316bd",
+    "6938fd4d98bab03faadb97b34396831e3780aea1",
+    "1c58a3a8518e8759bf075b76b750d4f2df264fcd",
+  ]
 }
 
 gha_iam_role = {
-  name = "gha-iam-role"
-  role_description = "GitHub Actions - Allow build and push to ECR"
-
-  github_repos = [
-    "brucehajdu/fastapi-lambda-case-study:*"
-  ]
-
-  managed_policy_arns = [
-    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
-  ]
+  name                = "gha-iam-role"
+  role_description    = "GitHub Actions - Allow build and push to ECR"
+  github_repos        = [ "repo:brucehajdu/fastapi-lambda-case-study:*" ]
+  managed_policy_arns = [ "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"]
 }

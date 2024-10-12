@@ -16,9 +16,9 @@ module "ecr_repositories" {
 module "github_oidc_provider" {
   source = "../../modules/iam/oidc_provider"
 
-  url = "https://token.actions.githubusercontent.com"
-  client_id_list = ["sts.amazonaws.com"]
-  thumbprint_list = ["9e99a48a9960b14926bb7f3b02e22da2b0ab7280"]
+  url             = var.github_oidc_provider.url
+  client_id_list  = var.github_oidc_provider.client_id_list
+  thumbprint_list = var.github_oidc_provider.thumbprint_list
 }
 
 module "gha_iam_role" {
