@@ -66,3 +66,4 @@ resource "aws_iam_instance_profile" "default" {
   name  = var.name
   role  = join("", aws_iam_role.default.*.name)
 }
+

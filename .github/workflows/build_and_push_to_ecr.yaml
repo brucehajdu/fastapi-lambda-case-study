@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 permissions:
-      id-token: write
-      contents: read
+  id-token: write
+  contents: read
 
 jobs:
   build-and-push:
@@ -17,8 +17,8 @@ jobs:
     strategy:
       matrix:
         image:
-          - { name: fastapi, dockerfile: api/Dockerfile }
-          - { name: fastapi-lambda, dockerfile: lambda/Dockerfile }
+          - { name: fastapi, path: api  }
+          - { name: fastapi-lambda, path: lambda }
 
     env:
       AWS_ACCOUNT_ID: 938674861148
@@ -40,7 +40,8 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -t ${{ matrix.image.name }}:latest -f ${{ matrix.image.dockerfile }} .
+        cd ${{ matrix.image.path }}
+        docker build -t ${{ matrix.image.name }}:latest .
 
     - name: Tag Docker image
       run: |

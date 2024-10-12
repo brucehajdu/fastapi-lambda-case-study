@@ -10,6 +10,13 @@ module "ecr_repositories" {
   name = each.value
 }
 
+module "github_oidc_provider" {
+  source = "../../modules/iam/oidc_provider"
+  url = "https://token.actions.githubusercontent.com"
+  client_id_list = ["sts.amazonaws.com"]
+  thumbprint_list = ["9e99a48a9960b14926bb7f3b02e22da2b0ab7280"]
+}
+
 module "gha_iam_role" {
   source = "../../modules/iam/role"
   name = "gha-iam-role"
@@ -17,18 +24,23 @@ module "gha_iam_role" {
   policy_document_count = 0
 
   principals = {
-      "Federated" = [
-      "arn:aws:iam::${local.account_id}:oidc-provider/token.actions.githubusercontent.com"
-      ]
+    "Federated" = [
+      module.github_oidc_provider.oidc_provider_arn
+    ]
   }
 
   assume_role_actions = ["sts:AssumeRoleWithWebIdentity"]
 
   assume_role_conditions = [
     {
-      test = "StringEquals"
+      test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values = [ for repo in module.ecr_repositories : "repo:${repo.repository_name}:ref:refs/heads/main" ]
+      values   = ["repo:brucehajdu/fastapi-lambda-case-study:*"]
+    },
+    {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:aud"
+      values   = ["sts.amazonaws.com"]
     }
   ]
 
