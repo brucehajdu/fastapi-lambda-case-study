@@ -3,6 +3,16 @@ variable "cidr_block" {
   description = "The CIDR range for the VPC"
 }
 
-variable "subnets" {
-  type = map(any)
+variable "vpc_name" {
+  type = string
+  description = "The name of the VPC"
 }
+
+variable "subnet_config" {
+  type = map(object({
+    public_cidr_block  = string
+    private_cidr_block = string
+    az                 = string
+  }))
+}
+

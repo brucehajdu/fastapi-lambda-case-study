@@ -3,9 +3,14 @@ variable "vpc_id" {
   description = "The VPC ID for the subnet"
 }
 
-variable "subnet_cidr_block" {
+variable "public_cidr_block" {
   type = string
-  description = "The CIDR block for the subnet"
+  description = "The CIDR block for the public subnet"
+}
+
+variable "private_cidr_block" {
+  type = string
+  description = "The CIDR block for the private subnet"
 }
 
 variable "availability_zone" {
@@ -13,12 +18,12 @@ variable "availability_zone" {
   description = "The AZ for the subnet"
 }
 
-variable "gateway_id" {
+variable "subnet_prefix" {
   type = string
-  description = "The gateway ID to route traffic to the internet"
+  description = "The prefix for the subnet name"
 }
 
-variable "is_public" {
-  type = bool
-  description = "Set to true for a public subnet"
+variable "gateway_id" {
+  type = string
+  description = "The ID of the Internet Gateway for the VPC"
 }

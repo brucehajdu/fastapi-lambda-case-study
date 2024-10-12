@@ -1,17 +1,21 @@
-data "aws_caller_identity" "current" {}
+module "vpc" {
+  source = "../../modules/vpc"
 
-locals {
-  account_id = data.aws_caller_identity.current.account_id
+  vpc_name        = var.vpc_name
+  cidr_block      = var.vpc_cidr_block
+  subnet_config   = var.subnet_config
 }
 
 module "ecr_repositories" {
-  source = "../../modules/repo"
+  source   = "../../modules/repo"
   for_each = toset(var.ecr_repositories)
+
   name = each.value
 }
 
 module "github_oidc_provider" {
   source = "../../modules/iam/oidc_provider"
+
   url = "https://token.actions.githubusercontent.com"
   client_id_list = ["sts.amazonaws.com"]
   thumbprint_list = ["9e99a48a9960b14926bb7f3b02e22da2b0ab7280"]
@@ -19,9 +23,11 @@ module "github_oidc_provider" {
 
 module "gha_iam_role" {
   source = "../../modules/iam/role"
-  name = "gha-iam-role"
-  role_description = "GitHub Actions - Allow build and push to ECR"
+  name                  = var.gha_iam_role.name
+  role_description      = var.gha_iam_role.role_description
   policy_document_count = 0
+  managed_policy_arns   = var.gha_iam_role.managed_policy_arns
+  assume_role_actions = ["sts:AssumeRoleWithWebIdentity"]
 
   principals = {
     "Federated" = [
@@ -29,22 +35,15 @@ module "gha_iam_role" {
     ]
   }
 
-  assume_role_actions = ["sts:AssumeRoleWithWebIdentity"]
-
-  assume_role_conditions = [
-    {
+  assume_role_conditions = [{
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:brucehajdu/fastapi-lambda-case-study:*"]
+      values   = var.gha_iam_role.github_repos
     },
     {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:aud"
       values   = ["sts.amazonaws.com"]
     }
-  ]
-
-  managed_policy_arns = [
-    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
   ]
 }
