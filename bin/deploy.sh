@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # BASH strict mode
-set -exuo pipefail
+set -euo pipefail
 
 # Function to check and login to AWS SSO
 check_aws_sso_login() {
