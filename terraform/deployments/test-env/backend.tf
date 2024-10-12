@@ -2,7 +2,7 @@ terraform {
   backend "s3" {
     bucket         = "reorg-bhajdu-tfstate"
     key            = "terraform.tfstate"
-    region         = "us-west-2"
+    region         = "us-east-1"
     dynamodb_table = "terraform-locks"
     encrypt        = true
   }

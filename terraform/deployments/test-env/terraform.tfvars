@@ -1,1 +1,4 @@
-# Put your variable values here
+ecr_repositories = [
+  "fastapi",
+  "fastapi-lambda"
+]
