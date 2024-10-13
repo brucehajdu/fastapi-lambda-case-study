@@ -1,5 +1,16 @@
-vpc_name       = "test-vpc"
-vpc_cidr_block = "10.0.0.0/20"
+vpc_name         = "test-vpc"
+vpc_cidr_block   = "10.0.0.0/20"
+ecs_cluster_name = "test-cluster"
+
+vpc_endpoints = [
+  "ecr.api",
+  "ecr.dkr",
+  "ecs",
+  "ecs-agent",
+  "ecs-telemetry",
+  "lambda",
+  "s3"
+]
 
 subnet_config = {
   "app-use1a" = {

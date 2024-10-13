@@ -41,3 +41,12 @@ variable "subnet_config" {
   }))
 }
 
+variable "ecs_cluster_name" {
+  description = "The name of the ECS cluster"
+  type        = string
+}
+
+variable "vpc_endpoints" {
+  description = "A list of VPC endpoints to create"
+  type        = list(string)
+}

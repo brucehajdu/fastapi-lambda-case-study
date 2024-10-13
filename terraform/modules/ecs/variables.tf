@@ -1,8 +1,18 @@
+variable "create" {
+  description = "Determines whether resources will be created (affects all resources)"
+  type        = bool
+  default     = true
+}
+
 variable "tags" {
   description = "A map of tags to add to all resources"
   type        = map(string)
   default     = {}
 }
+
+################################################################################
+# Cluster
+################################################################################
 
 variable "cluster_name" {
   description = "Name of the cluster (up to 255 letters, numbers, hyphens, and underscores)"
@@ -32,6 +42,16 @@ variable "cluster_service_connect_defaults" {
   type        = map(string)
   default     = {}
 }
+
+variable "cluster_tags" {
+  description = "A map of additional tags to add to the cluster"
+  type        = map(string)
+  default     = {}
+}
+
+################################################################################
+# CloudWatch Log Group
+################################################################################
 
 variable "create_cloudwatch_log_group" {
   description = "Determines whether a log group is created by this module for the cluster logs. If not, AWS will automatically create one if logging is enabled"
@@ -63,6 +83,10 @@ variable "cloudwatch_log_group_tags" {
   default     = {}
 }
 
+################################################################################
+# Capacity Providers
+################################################################################
+
 variable "default_capacity_provider_use_fargate" {
   description = "Determines whether to use Fargate or autoscaling for default capacity provider strategy"
   type        = bool
@@ -80,6 +104,11 @@ variable "autoscaling_capacity_providers" {
   type        = any
   default     = {}
 }
+
+################################################################################
+# Task Execution - IAM Role
+# https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html
+################################################################################
 
 variable "create_task_exec_iam_role" {
   description = "Determines whether the ECS task definition IAM role should be created"
@@ -149,6 +178,16 @@ variable "task_exec_secret_arns" {
 
 variable "task_exec_iam_statements" {
   description = "A map of IAM policy [statements](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#statement) for custom permission usage"
+  type        = any
+  default     = {}
+}
+
+################################################################################
+# Service(s)
+################################################################################
+
+variable "services" {
+  description = "Map of service definitions to create"
   type        = any
   default     = {}
 }

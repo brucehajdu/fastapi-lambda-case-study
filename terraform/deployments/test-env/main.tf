@@ -4,6 +4,7 @@ module "vpc" {
   vpc_name        = var.vpc_name
   cidr_block      = var.vpc_cidr_block
   subnet_config   = var.subnet_config
+  vpc_endpoints   = var.vpc_endpoints
 }
 
 module "ecr_repositories" {
@@ -46,4 +47,77 @@ module "gha_iam_role" {
       values   = ["sts.amazonaws.com"]
     }
   ]
+}
+
+module "ecs_cluster" {
+  source = "../../modules/ecs/"
+
+  cluster_name = var.ecs_cluster_name
+  create_cloudwatch_log_group = false
+
+  fargate_capacity_providers = {
+    FARGATE = {
+      default_capacity_provider_strategy = {
+        weight = 100
+        base   = 2
+      }
+    }
+  }
+
+  services = {
+    fastapi = {
+      cpu = 256
+      memory = 1024
+
+      enable_cloudwatch_logging = false
+      create_cloudwatch_log_group = false
+      enable_execute_command = true
+
+      subnet_ids = module.vpc.private_subnet_ids
+      security_group_rules = {
+        ingress = {
+          type                     = "ingress"
+          from_port                = 0
+          to_port                  = 0
+          protocol                 = "-1"
+          description              = "All Ports"
+          cidr_blocks              = ["0.0.0.0/0"]
+        }
+        egress = {
+          type        = "egress"
+          from_port   = 0
+          to_port     = 0
+          protocol    = "-1"
+          cidr_blocks = ["0.0.0.0/0"]
+        }
+      }
+
+      container_definitions = {
+        canary = {
+          create_cloudwatch_log_group = false
+          enable_cloudwatch_logging = false
+          image = "${module.ecr_repositories["fastapi"].repository_url}:latest"
+          port_mappings = [
+            {
+              containerPort = 8000
+              hostPort      = 8000
+              protocol      = "tcp"
+            }
+          ]
+
+          health_check = {
+            command = ["CMD-SHELL", "curl -f http://localhost:8000/ || exit 1"]
+          }
+        }
+      }
+
+    # load_balancer = {
+    #   service = {
+    #       target_group_arn = module.alb.target_group.arn
+    #       container_name   = "fastapi"
+    #       container_port   = 80
+    #     }
+    #   }
+    }
+  }
 }
