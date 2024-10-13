@@ -42,7 +42,11 @@ docker build -t fastapi-lambda:latest .
 To deploy the infrastructure using Terraform, follow these steps:
 
 ```sh
-cd terraform/deployments/test-env
+cd terraform/deployments/bootstrap
+terraform init
+terraform apply -auto-approve
+
+cd ../test-env
 terraform init
 terraform apply -auto-approve
 ```
