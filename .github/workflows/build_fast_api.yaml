@@ -5,7 +5,7 @@ name: Build and Push FastAPI Docker Image to ECR
 on:
   push:
     branches:
-      - main
+      - crawl
     paths:
       - 'api/**'
   workflow_dispatch:
