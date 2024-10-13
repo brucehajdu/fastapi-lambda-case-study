@@ -49,11 +49,18 @@ module "gha_iam_role" {
   ]
 }
 
+module "alb" {
+  source = "../../modules/alb"
+
+  alb_name        = var.alb_name
+  vpc_id          = module.vpc.vpc_id
+  subnet_ids      = module.vpc.public_subnet_ids
+}
+
 module "ecs_cluster" {
   source = "../../modules/ecs/"
 
   cluster_name = var.ecs_cluster_name
-  create_cloudwatch_log_group = false
 
   fargate_capacity_providers = {
     FARGATE = {
@@ -69,19 +76,27 @@ module "ecs_cluster" {
       cpu = 256
       memory = 1024
 
-      enable_cloudwatch_logging = false
-      create_cloudwatch_log_group = false
-      enable_execute_command = true
+      enable_cloudwatch_logging   = true
+      create_cloudwatch_log_group = true
+      enable_execute_command      = true
+      subnet_ids                  = module.vpc.private_subnet_ids
 
-      subnet_ids = module.vpc.private_subnet_ids
+      load_balancer = {
+        service = {
+          target_group_arn = module.alb.target_group_arn
+          container_name   = var.container_name
+          container_port   = var.container_port
+        }
+      }
+
       security_group_rules = {
         ingress = {
           type                     = "ingress"
-          from_port                = 0
-          to_port                  = 0
+          from_port                = var.container_port
+          to_port                  = var.container_port
           protocol                 = "-1"
-          description              = "All Ports"
-          cidr_blocks              = ["0.0.0.0/0"]
+          description              = "Allow traffic from the ALB"
+          source_security_group_id = module.alb.security_group_id
         }
         egress = {
           type        = "egress"
@@ -93,31 +108,30 @@ module "ecs_cluster" {
       }
 
       container_definitions = {
-        canary = {
-          create_cloudwatch_log_group = false
-          enable_cloudwatch_logging = false
+        (var.container_name) = {
+          create_cloudwatch_log_group = true
+          enable_cloudwatch_logging = true
           image = "${module.ecr_repositories["fastapi"].repository_url}:latest"
           port_mappings = [
             {
-              containerPort = 8000
-              hostPort      = 8000
+              containerPort = var.container_port
+              hostPort      = var.container_port
               protocol      = "tcp"
             }
           ]
 
+          log_configuration = {
+            logDriver = "awslogs"
+          }
+
           health_check = {
-            command = ["CMD-SHELL", "curl -f http://localhost:8000/ || exit 1"]
+            command = ["CMD-SHELL", var.container_health_check_command]
+            interval = 5
+            timeout  = 5
+            retries  = 3
           }
         }
       }
-
-    # load_balancer = {
-    #   service = {
-    #       target_group_arn = module.alb.target_group.arn
-    #       container_name   = "fastapi"
-    #       container_port   = 80
-    #     }
-    #   }
     }
   }
 }

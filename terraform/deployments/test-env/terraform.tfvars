@@ -1,6 +1,11 @@
 vpc_name         = "test-vpc"
 vpc_cidr_block   = "10.0.0.0/20"
 ecs_cluster_name = "test-cluster"
+alb_name         = "test-alb"
+
+container_name = "canary"
+container_port = 8000
+container_health_check_command = "curl -f http://localhost:8000/ || exit 1"
 
 vpc_endpoints = [
   "ecr.api",

@@ -50,3 +50,23 @@ variable "vpc_endpoints" {
   description = "A list of VPC endpoints to create"
   type        = list(string)
 }
+
+variable "container_name" {
+  description = "The name of the container"
+  type        = string
+}
+
+variable "container_port" {
+  description = "The port the container listens on"
+  type        = number
+}
+
+variable "container_health_check_command" {
+  description = "The command to use for the container health check"
+  type        = string
+}
+
+variable "alb_name" {
+  description = "The name of the ALB"
+  type        = string
+}
