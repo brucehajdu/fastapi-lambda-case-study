@@ -27,14 +27,14 @@ To build the Docker images locally, follow these steps:
 
 ```sh
 cd api/
-docker build -t fastapi-app:latest .
+docker build -t fastapi:latest .
 ```
 
 **Lambda Function**
 
 ```sh
 cd api/
-docker build -t fastapi-app:latest .
+docker build -t fastapi-lambda:latest .
 ```
 
 ### Deploy the Terraform
