@@ -15,5 +15,5 @@ jobs:
   build-and-push:
     uses: ./.github/workflows/build_and_push_to_ecr.yaml
     with:
-      image-name: fastapi-app
-      image-path: api
+      image_name: fastapi-app
+      image_path: api
