@@ -1,0 +1,19 @@
+# use build_and_push_to_ecr.yaml to build and push the Docker image to Amazon ECR.
+
+name: Build and Push FastAPI Docker Image to ECR
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'api/**'
+  workflow_dispatch:
+
+
+jobs:
+  build-and-push:
+    uses: ./.github/workflows/build_and_push_to_ecr.yaml
+    with:
+      image-name: fastapi-app
+      image-path: api

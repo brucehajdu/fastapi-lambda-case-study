@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastAPI Frontend</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        label, input, button {
+            margin: 5px 0;
+            display: block;
+        }
+        .response, .error {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            white-space: pre-wrap;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<h1>FastAPI Frontend</h1>
+
+<h2>Health Check</h2>
+<button id="check-health">Check Health</button>
+<div id="health-response" class="response"></div>
+
+<h2>Get Item by ID</h2>
+<form id="get-item-form">
+    <label for="item_id">Item ID:</label>
+    <input type="number" id="item_id" name="item_id" required>
+
+    <label for="q">Query (optional):</label>
+    <input type="text" id="q" name="q">
+
+    <button type="submit">Get Item</button>
+</form>
+<div id="get-item-response" class="response"></div>
+<div id="get-item-error" class="error"></div>
+
+<script>
+    const healthButton = document.getElementById('check-health');
+    const healthResponseDiv = document.getElementById('health-response');
+
+    healthButton.addEventListener('click', async () => {
+        const response = await fetch('/health');
+        const data = await response.json();
+        healthResponseDiv.textContent = JSON.stringify(data, null, 2);
+    });
+
+    const getItemForm = document.getElementById('get-item-form');
+    const getItemResponseDiv = document.getElementById('get-item-response');
+    const getItemErrorDiv = document.getElementById('get-item-error');
+
+    getItemForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const itemId = document.getElementById('item_id').value;
+        const q = document.getElementById('q').value;
+
+        try {
+            const response = await fetch(`/items/${itemId}?q=${encodeURIComponent(q)}`);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(JSON.stringify(errorData, null, 2));
+            }
+            const data = await response.json();
+            getItemResponseDiv.textContent = JSON.stringify(data, null, 2);
+            getItemErrorDiv.textContent = '';
+        } catch (error) {
+            getItemErrorDiv.textContent = `Error: ${error.message}`;
+            getItemResponseDiv.textContent = '';
+        }
+    });
+</script>
+
+</body>
+</html>
