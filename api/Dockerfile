@@ -6,7 +6,7 @@ COPY ./requirements.txt /app/requirements.txt
 COPY ./app /app
 
 RUN pip install -r /app/requirements.txt && \
-    apt upgrade -y && \
+    apt update -y && \
     apt install -y curl && \
     rm -rf /var/lib/apt/lists/*
 
