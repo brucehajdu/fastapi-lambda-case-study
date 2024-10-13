@@ -13,7 +13,8 @@ invalid_item_ids = [
     dict(),
     None,
     3.14159,
-    -1
+    -1,
+    -100,
 ]
 
 def test_read_main():
