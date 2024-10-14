@@ -1,16 +1,8 @@
-from fastapi import FastAPI, HTTPException, staticfiles
-from starlette.responses import FileResponse
-import os
+from fastapi import FastAPI, HTTPException
 
 app = FastAPI()
 
-app.mount("/static", staticfiles.StaticFiles(directory="static"), name="static")
-
 @app.get("/")
-async def read_index():
-    return FileResponse(os.path.join("static", "index.html"))
-
-@app.get("/hello")
 def read_root():
     return {"message": "Hello, World!"}
 

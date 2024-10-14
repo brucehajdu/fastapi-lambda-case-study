@@ -26,9 +26,9 @@ ecr_repositories = {
 }
 
 # ECS Configuration
-alb_name                       = "test-alb"
+alb_name                       = "fastapi-alb"
 https_enabled                  = false
-ecs_cluster_name               = "test-cluster"
+ecs_cluster_name               = "fastapi-cluster"
 container_name                 = "fastapi"
 container_port                 = 8000
 container_health_check_command = "curl -f http://localhost:8000/ || exit 1"
