@@ -3,7 +3,7 @@ name: Deploy FastAPI ECS Service
 on:
   push:
     branches:
-      - main
+      - crawl
     paths:
       - 'api/**'
 
