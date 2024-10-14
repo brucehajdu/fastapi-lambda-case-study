@@ -1,4 +1,4 @@
-name: Build and Push Lambda docker Image to ECR
+name: Build and Push Lambda Docker Image to ECR
 
 on:
   push:

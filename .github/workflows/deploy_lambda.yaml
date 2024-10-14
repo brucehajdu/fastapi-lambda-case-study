@@ -1,12 +1,7 @@
 name: Deploy Lambda
 
 on:
-  workflow_call:
-    inputs:
-      lambda_name:
-        description: 'Name of the Lambda'
-        required: true
-        type: string
+  workflow_dispatch:
 
 permissions:
   id-token: write
