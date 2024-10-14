@@ -30,4 +30,5 @@ jobs:
       with:
         service: fastapi
         cluster: fastapi-cluster
+        task-definition: fastapi
         wait-for-service-stability: true
