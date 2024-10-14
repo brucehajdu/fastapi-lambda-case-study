@@ -26,7 +26,7 @@ jobs:
         aws-region: ${{ env.AWS_REGION }}
 
     - name: Update Lambda function
-      uses: aws-actions/aws-lambda-deploy@v1
-      with:
-        function-name: fastapi-lambda
-        image-uri: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/fastapi-lambda:latest
+      run: |
+        aws lambda update-function-code \
+          --function-name fastapi-lambda \
+          --image-uri ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/fastapi-lambda:latest
