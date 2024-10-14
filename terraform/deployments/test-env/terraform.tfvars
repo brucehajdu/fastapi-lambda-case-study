@@ -45,9 +45,16 @@ github_oidc_provider = {
   ]
 }
 
-gha_iam_role = {
-  name                = "gha-iam-role"
+gha_ecr_iam_role = {
+  name                = "gha-ecr-iam-role"
   role_description    = "GitHub Actions - Allow build and push to ECR"
   github_repos        = ["repo:brucehajdu/fastapi-lambda-case-study:*"]
   managed_policy_arns = ["arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"]
+}
+
+gha_ecs_lambda_iam_role = {
+  name                = "gha-ecs-lambda-iam-role"
+  role_description    = "GitHub Actions - Allow management of ECS and Lambda"
+  github_repos        = ["repo:brucehajdu/fastapi-lambda-case-study:*"]
+  managed_policy_arns = []
 }

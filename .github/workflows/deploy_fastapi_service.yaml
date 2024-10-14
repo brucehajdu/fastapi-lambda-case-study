@@ -1,4 +1,4 @@
-name: Deploy ECS Service
+name: Deploy FastAPI ECS Service
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  build-and-push:
+  deploy-fastapi-service:
     runs-on: ubuntu-latest
 
     env:

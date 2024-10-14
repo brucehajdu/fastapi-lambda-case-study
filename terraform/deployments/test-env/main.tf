@@ -60,8 +60,8 @@ data "aws_iam_policy_document" "ecs_lambda_allow" {
 
     resources = [
       module.ecs_cluster.cluster_arn,
-      "${module.ecs_cluster.cluster_arn}/${module.ecs_cluster.services["fastapi"].name}",
-      module.ecs_cluster.services["fastapi"].task_definition_arn
+      "arn:aws:ecs:${local.region}:${local.account_id}:service/*",
+      "arn:aws:ecs:${local.region}:${local.account_id}:task/*",
     ]
   }
 
@@ -70,7 +70,8 @@ data "aws_iam_policy_document" "ecs_lambda_allow" {
       "lambda:UpdateFunctionCode",
       "lambda:PublishVersion",
       "lambda:GetFunction",
-      "lambda:InvokeFunction"
+      "lambda:InvokeFunction",
+      "lambda:GetFunctionConfiguration"
     ]
 
     resources = [
@@ -79,12 +80,12 @@ data "aws_iam_policy_document" "ecs_lambda_allow" {
   }
 }
 
-module "gha_iam_role" {
+module "gha_ecr_iam_role" {
   source                = "../../modules/iam/role"
-  name                  = var.gha_iam_role.name
-  role_description      = var.gha_iam_role.role_description
-  policy_document_count = 2
-  managed_policy_arns   = var.gha_iam_role.managed_policy_arns
+  name                  = var.gha_ecr_iam_role.name
+  role_description      = var.gha_ecr_iam_role.role_description
+  policy_document_count = 0
+  managed_policy_arns   = var.gha_ecr_iam_role.managed_policy_arns
   assume_role_actions   = ["sts:AssumeRoleWithWebIdentity"]
 
   principals = {
@@ -96,7 +97,33 @@ module "gha_iam_role" {
   assume_role_conditions = [{
     test     = "StringLike"
     variable = "token.actions.githubusercontent.com:sub"
-    values   = var.gha_iam_role.github_repos
+    values   = var.gha_ecr_iam_role.github_repos
+    },
+    {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+  ]
+}
+
+module "gha_ecs_lambda_iam_role" {
+  source                = "../../modules/iam/role"
+  name                  = var.gha_ecs_lambda_iam_role.name
+  role_description      = var.gha_ecs_lambda_iam_role.role_description
+  policy_document_count = 1
+  assume_role_actions   = ["sts:AssumeRoleWithWebIdentity"]
+
+  principals = {
+    "Federated" = [
+      module.github_oidc_provider.oidc_provider_arn
+    ]
+  }
+
+  assume_role_conditions = [{
+    test     = "StringLike"
+    variable = "token.actions.githubusercontent.com:sub"
+    values   = var.gha_ecs_lambda_iam_role.github_repos
     },
     {
       test     = "StringEquals"
@@ -196,7 +223,8 @@ module "ecs_cluster" {
   }
 
   depends_on = [
-    module.ecr_repositories
+    module.ecr_repositories,
+    module.alb
   ]
 }
 

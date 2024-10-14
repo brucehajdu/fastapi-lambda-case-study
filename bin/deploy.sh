@@ -87,7 +87,7 @@ if [ "$ACTION" == "-destroy" ]; then
   destroy_terraform
 else
   check_gh_login
-  deploy_terraform "module.ecr_repositories" "module.github_oidc_provider" "module.gha_iam_role"
+  deploy_terraform "module.ecr_repositories" "module.github_oidc_provider" "module.gha_ecr_iam_role"
   trigger_gha "Build and Push FastAPI Docker Image to ECR"
   trigger_gha "Build and Push Lambda docker Image to ECR"
   deploy_terraform

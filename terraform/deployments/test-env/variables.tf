@@ -22,13 +22,23 @@ variable "github_oidc_provider" {
   })
 }
 
-variable "gha_iam_role" {
-  description = "GitHub Actions IAM role configuration"
+variable "gha_ecr_iam_role" {
+  description = "GitHub Actions IAM role configuration for ECR"
   type = object({
     name                = string
     role_description    = string
     github_repos        = list(string)
     managed_policy_arns = list(string)
+  })
+}
+
+variable "gha_ecs_lambda_iam_role" {
+  description = "GitHub Actions IAM role configuration for ECS and Lambda"
+  type = object({
+      name                = string
+      role_description    = string
+      github_repos        = list(string)
+      managed_policy_arns = list(string)
   })
 }
 
