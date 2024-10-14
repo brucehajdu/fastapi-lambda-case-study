@@ -25,10 +25,33 @@ jobs:
         role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/gha-ecs-lambda-iam-role
         aws-region: ${{ env.AWS_REGION }}
 
-    - name: Restart ECS Service
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        service: fastapi
-        cluster: fastapi-cluster
-        task-definition: fastapi
-        wait-for-service-stability: true
+    - name: Re-Deploy ECS service
+      run: |
+        aws ecs update-service \
+          --cluster fastapi-cluster \
+          --service fastapi \
+          --force-new-deployment
+
+    - name: Wait for ECS deployment to complete
+      run: |
+        timeout=600
+        interval=10
+        elapsed=0
+        while [ $elapsed -lt $timeout ]; do
+          STATUS=$(aws ecs describe-services --cluster fastapi-cluster --services fastapi --query 'services[0].deployments[0].rolloutState' --output text)
+          if [ "$STATUS" == "COMPLETED" ]; then
+            echo "ECS deployment completed successfully."
+            break
+          elif [ "$STATUS" == "FAILED" ]; then
+            echo "ECS deployment failed."
+            exit 1
+          else
+            echo "Waiting for ECS deployment to complete..."
+            sleep $interval
+            elapsed=$((elapsed + interval))
+          fi
+        done
+        if [ $elapsed -ge $timeout ]; then
+          echo "ECS deployment timed out."
+          exit 1
+        fi
