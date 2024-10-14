@@ -76,3 +76,8 @@ variable "https_enabled" {
   type        = bool
   default     = false
 }
+
+variable "bucket_name" {
+  description = "The name of the bucket"
+  type        = string
+}

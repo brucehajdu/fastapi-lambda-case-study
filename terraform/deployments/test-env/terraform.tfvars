@@ -1,6 +1,7 @@
 vpc_name         = "test-vpc"
 vpc_cidr_block   = "10.0.0.0/20"
 ecs_cluster_name = "test-cluster"
+bucket_name      = "reorg-bhajdu-case-study"
 alb_name         = "test-alb"
 https_enabled    = false
 

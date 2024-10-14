@@ -14,6 +14,12 @@ module "ecr_repositories" {
   name = each.value
 }
 
+module "bucket" {
+  source = "../../modules/bucket"
+
+  bucket_name = var.bucket_name
+}
+
 module "github_oidc_provider" {
   source = "../../modules/iam/oidc_provider"
 
@@ -134,13 +140,36 @@ module "ecs_cluster" {
   }
 }
 
+data "aws_iam_policy_document" "lambda_s3_access" {
+  statement {
+    actions = [
+      "s3:ListBucket",
+      "s3:ListBucketVersions"
+    ]
+
+    resources = [
+      module.bucket.bucket_arn
+    ]
+  }
+
+  statement {
+      actions   = [
+        "s3:GetObject*",
+        "s3:PutObject*"
+      ]
+      resources = [
+        "${module.bucket.bucket_arn}/*"
+      ]
+  }
+}
+
 module "lambda_role" {
   source = "../../modules/iam/role"
 
   name                  = "test-lambda-role"
   role_description      = "IAM role for Lambda function"
   assume_role_actions   = ["sts:AssumeRole"]
-  policy_document_count = 0
+  policy_document_count = 1
 
   principals = {
     "Service" = ["lambda.amazonaws.com"]
@@ -149,6 +178,10 @@ module "lambda_role" {
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
     "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+  ]
+
+  policy_documents = [
+    data.aws_iam_policy_document.lambda_s3_access.json
   ]
 }
 

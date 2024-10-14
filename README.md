@@ -80,7 +80,7 @@ The workflows will be kicked off using `bin/deploy.sh` when automatically deploy
 
 ## Notes
 
-- The FastAPI application is accessible via HTTP at the public DNS name of the ALB.
+- The FastAPI application is accessible via HTTP at the public DNS name of the ALB at https://us-east-1.console.aws.amazon.com/ec2/home?region=us-east-1#LoadBalancers: (change the region in the URL if required)
 - Deploying the infrastructure will incur costs (Roughly \$2-\$3 per day). Be sure to tear down the environment when you're done.
-- Tearing down the entire environment will take a while due to the ENIs attached to the lambda (AWS does not release those from the lambda for several minutes).  Terraform may time out if your timeout settings are too short.
+- Tearing down the entire environment may take a while due to the ENIs attached to the lambda (AWS does not release those from the lambda for several minutes).  Terraform may time out if your timeout settings are too short.
 - The ECR repositories will not be deleted when tearing down the environment **unless** the images pushed from GHA are fully deleted from the repositories first.
