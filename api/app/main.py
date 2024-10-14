@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 
 app = FastAPI()
 
+# test comment
 @app.get("/")
 def read_root():
     return {"message": "Hello, World!"}

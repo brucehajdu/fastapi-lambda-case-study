@@ -20,7 +20,7 @@ jobs:
 
   deploy-fastapi-service:
     runs-on: ubuntu-latest
-    needS: build-and-push
+    needs: build-and-push
 
     env:
       AWS_ACCOUNT_ID: 938674861148

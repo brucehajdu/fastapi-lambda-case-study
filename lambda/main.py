@@ -5,6 +5,7 @@ from datetime import datetime
 s3 = boto3.client('s3')
 bucket_name = 'reorg-bhajdu-case-study'
 
+# test comment
 def lambda_handler(event, context):
     """
     A basic AWS Lambda function that writes a message to an S3 bucket.
