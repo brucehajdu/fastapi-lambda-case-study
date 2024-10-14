@@ -1,4 +1,4 @@
-name: Deploy FastAPI ECS Service
+name: Build and Deploy FastAPI ECS Service
 
 on:
   push:
