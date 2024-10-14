@@ -1,9 +1,6 @@
 name: Deploy Lambda
 
 on:
-  push:
-    branches:
-      - crawl
   workflow_call:
     inputs:
       lambda_name:

@@ -1,9 +1,6 @@
 name: Deploy ECS Service
 
 on:
-  push:
-    branches:
-      - crawl
   workflow_call:
     inputs:
       service_name:
