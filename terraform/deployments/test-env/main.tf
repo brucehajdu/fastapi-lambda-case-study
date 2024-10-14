@@ -52,9 +52,10 @@ module "gha_iam_role" {
 module "alb" {
   source = "../../modules/alb"
 
-  alb_name   = var.alb_name
-  vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.vpc.public_subnet_ids
+  alb_name      = var.alb_name
+  vpc_id        = module.vpc.vpc_id
+  subnet_ids    = module.vpc.public_subnet_ids
+  https_enabled = var.https_enabled
 }
 
 module "ecs_cluster" {

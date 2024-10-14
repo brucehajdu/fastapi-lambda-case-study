@@ -70,3 +70,9 @@ variable "alb_name" {
   description = "The name of the ALB"
   type        = string
 }
+
+variable "https_enabled" {
+  description = "Whether to enable HTTPS on the ALB"
+  type        = bool
+  default     = false
+}

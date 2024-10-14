@@ -1,9 +1,7 @@
 #!/bin/bash
 
-# BASH strict mode
 set -euo pipefail
 
-# Function to check and login to AWS SSO
 check_aws_sso_login() {
   if ! aws sts get-caller-identity &> /dev/null; then
     echo "AWS SSO login required. Initiating login..."
@@ -23,7 +21,6 @@ check_aws_sso_login() {
   fi
 }
 
-# Function to check and login to GitHub CLI
 check_gh_login() {
   if ! gh auth status &> /dev/null; then
     echo "GitHub CLI login required. Initiating login..."
@@ -58,13 +55,15 @@ destroy_terraform() {
   popd
 }
 
-# Function to trigger GitHub Actions workflow using gh CLI and monitor its progress
 trigger_gha() {
-  echo "Triggering GitHub Actions workflow..."
-  workflow_run_output=$(gh workflow run "Build and Push Docker Image to ECR" --ref crawl)
+  workflow_name=$1
+
+  echo "Triggering GitHub Actions workflow ${workflow_name}..."
+  workflow_run_output=$(gh workflow run "${workflow_name}" --ref crawl)
+
   # This is a bit brittle, but it'll work for this purpose, we want the job to be registered before we query for it
   sleep 5
-  run_id=$(gh run list --json databaseId --workflow="Build and Push Docker Image to ECR" --limit 1 | jq -r '.[0].databaseId')
+  run_id=$(gh run list --json databaseId --workflow="${workflow_name}" --limit 1 | jq -r '.[0].databaseId')
   echo "Workflow triggered with ID: $run_id"
   echo "Monitoring workflow progress..."
   gh run watch $run_id
@@ -77,5 +76,6 @@ if [ "$ACTION" == "-destroy" ]; then
 else
   check_gh_login
   deploy_terraform
-  trigger_gha
+  trigger_gha "Build and Push FastAPI Docker Image to ECR"
+  trigger_gha "Build and Push Lambda docker Image to ECR"
 fi
