@@ -3,7 +3,7 @@ name: Build and Deploy FastAPI ECS Service
 on:
   push:
     branches:
-      - crawl
+      - main
     paths:
       - 'api/**'
 
@@ -57,7 +57,7 @@ jobs:
             echo "ECS deployment failed."
             exit 1
           else
-            echo "Waiting for ECS deployment to complete..."
+            echo "Waiting for ECS deployment to complete... ${elapsed}s"
             sleep $interval
             elapsed=$((elapsed + interval))
           fi
