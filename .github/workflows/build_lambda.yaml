@@ -1,11 +1,6 @@
 name: Build and Push Lambda Docker Image to ECR
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'lambda/**'
   workflow_dispatch:
 
 permissions:

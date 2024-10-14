@@ -1,0 +1,58 @@
+name: Deploy Lambda
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'lambda/**'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-push:
+    uses: ./.github/workflows/build_and_push_to_ecr.yaml
+    with:
+      image_name: fastapi-lambda
+      image_path: lambda
+
+  deploy-lambda:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCOUNT_ID: 938674861148
+      AWS_REGION: us-east-1
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/gha-ecs-lambda-iam-role
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Update Lambda function
+      run: |
+        aws lambda update-function-code \
+          --function-name fastapi-lambda \
+          --image-uri ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/fastapi-lambda:latest
+
+    - name: Wait for Lambda update to complete
+      run: |
+        while true; do
+          STATUS=$(aws lambda get-function-configuration --function-name fastapi-lambda --query 'LastUpdateStatus' --output text)
+          if [ "$STATUS" == "Successful" ]; then
+            echo "Lambda update completed successfully."
+            break
+          elif [ "$STATUS" == "Failed" ]; then
+            echo "Lambda update failed."
+            exit 1
+          else
+            echo "Waiting for Lambda update to complete..."
+            sleep 10
+          fi
+        done
