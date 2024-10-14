@@ -1,6 +1,6 @@
 variable "ecr_repositories" {
   description = "A list of ECR repositories to create"
-  type        = list(string)
+  type        = map(string)
 }
 
 variable "vpc_name" {

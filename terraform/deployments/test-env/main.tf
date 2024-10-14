@@ -1,3 +1,20 @@
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+
+# This block is necessary to ensure that no "known after apply" errors are encountered during apply operations
+# This allows us to create and destroy pieces of the environment without Terraform complaining
+locals {
+  account_id        = data.aws_caller_identity.current.account_id
+  region            = data.aws_region.current.name
+  fastapi_repo_name = var.ecr_repositories["fastapi"]
+  lambda_repo_name  = var.ecr_repositories["lambda"]
+  ecr_repo_prefix   = "${local.account_id}.dkr.ecr.${local.region}.amazonaws.com"
+
+  fastapi_repo_url = "${local.ecr_repo_prefix}/${local.fastapi_repo_name}:latest"
+  lambda_repo_url  = "${local.ecr_repo_prefix}/${local.lambda_repo_name}:latest"
+}
+
+# VPC Configuration
 module "vpc" {
   source = "../../modules/vpc"
 
@@ -7,19 +24,22 @@ module "vpc" {
   vpc_endpoints = var.vpc_endpoints
 }
 
+# ECR Configuration
 module "ecr_repositories" {
   source   = "../../modules/repo"
-  for_each = toset(var.ecr_repositories)
+  for_each = var.ecr_repositories
 
   name = each.value
 }
 
+# S3 Bucket Configuration
 module "bucket" {
   source = "../../modules/bucket"
 
   bucket_name = var.bucket_name
 }
 
+# Github Actions Configuration
 module "github_oidc_provider" {
   source = "../../modules/iam/oidc_provider"
 
@@ -55,6 +75,7 @@ module "gha_iam_role" {
   ]
 }
 
+# ECS Configuration
 module "alb" {
   source = "../../modules/alb"
 
@@ -118,7 +139,7 @@ module "ecs_cluster" {
         (var.container_name) = {
           create_cloudwatch_log_group = true
           enable_cloudwatch_logging   = true
-          image                       = "${module.ecr_repositories["fastapi"].repository_url}:latest"
+          image                       = local.fastapi_repo_url
           port_mappings = [
             {
               containerPort = var.container_port
@@ -138,8 +159,13 @@ module "ecs_cluster" {
       }
     }
   }
+
+  depends_on = [
+    module.ecr_repositories
+  ]
 }
 
+# Lambda Configuration
 data "aws_iam_policy_document" "lambda_s3_access" {
   statement {
     actions = [
@@ -153,13 +179,13 @@ data "aws_iam_policy_document" "lambda_s3_access" {
   }
 
   statement {
-      actions   = [
-        "s3:GetObject*",
-        "s3:PutObject*"
-      ]
-      resources = [
-        "${module.bucket.bucket_arn}/*"
-      ]
+    actions = [
+      "s3:GetObject*",
+      "s3:PutObject*"
+    ]
+    resources = [
+      "${module.bucket.bucket_arn}/*"
+    ]
   }
 }
 
@@ -190,7 +216,7 @@ module "lambda" {
 
   function_name = "test-lambda"
   role_arn      = module.lambda_role.arn
-  image_uri     = "${module.ecr_repositories["fastapi-lambda"].repository_url}:latest"
+  image_uri     = local.lambda_repo_url
 
   subnet_ids = module.vpc.private_subnet_ids
   vpc_id     = module.vpc.vpc_id
@@ -198,4 +224,8 @@ module "lambda" {
   environment_variables = {
     "ENVIRONMENT" = "test"
   }
+
+  depends_on = [
+    module.ecr_repositories
+  ]
 }

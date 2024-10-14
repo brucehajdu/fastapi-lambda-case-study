@@ -3,7 +3,7 @@
 set -euo pipefail
 
 check_aws_sso_login() {
-  if ! aws sts get-caller-identity &> /dev/null; then
+  if ! aws sso list-accounts --max-results 1 &> /dev/null; then
     echo "AWS SSO login required. Initiating login..."
     aws sso login
     echo "Waiting for AWS SSO login to complete..."
@@ -43,8 +43,16 @@ check_gh_login() {
 deploy_terraform() {
   echo "Initializing and deploying Terraform for test-env..."
   pushd terraform/deployments/test-env
+    local targets=""
+    if [ "$#" -gt 0 ]; then
+      echo "Found targets: $@"
+      for target in "$@"; do
+        targets="$targets -target=$target"
+      done
+    fi
+
     terraform init -reconfigure
-    terraform apply -auto-approve
+    terraform apply -auto-approve $targets
   popd
 }
 
@@ -75,7 +83,8 @@ if [ "$ACTION" == "-destroy" ]; then
   destroy_terraform
 else
   check_gh_login
-  deploy_terraform
+  deploy_terraform "module.ecr_repositories" "module.github_oidc_provider" "module.gha_iam_role"
   trigger_gha "Build and Push FastAPI Docker Image to ECR"
   trigger_gha "Build and Push Lambda docker Image to ECR"
+  deploy_terraform
 fi

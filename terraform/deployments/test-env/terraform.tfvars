@@ -1,23 +1,7 @@
-vpc_name         = "test-vpc"
-vpc_cidr_block   = "10.0.0.0/20"
-ecs_cluster_name = "test-cluster"
-bucket_name      = "reorg-bhajdu-case-study"
-alb_name         = "test-alb"
-https_enabled    = false
-
-container_name                 = "fastapi"
-container_port                 = 8000
-container_health_check_command = "curl -f http://localhost:8000/ || exit 1"
-
-vpc_endpoints = [
-  "ecr.api",
-  "ecr.dkr",
-  "ecs",
-  "ecs-agent",
-  "ecs-telemetry",
-  "lambda",
-  "s3"
-]
+# VPC Configuration
+vpc_name       = "test-vpc"
+vpc_cidr_block = "10.0.0.0/20"
+vpc_endpoints  = ["ecr.api", "ecr.dkr", "ecs", "ecs-agent", "ecs-telemetry", "lambda", "s3"]
 
 subnet_config = {
   "app-use1a" = {
@@ -32,11 +16,24 @@ subnet_config = {
   },
 }
 
-ecr_repositories = [
-  "fastapi",
-  "fastapi-lambda"
-]
+# S3 Bucket Configuration
+bucket_name = "reorg-bhajdu-case-study"
 
+# ECR Configuration
+ecr_repositories = {
+  "fastapi" : "fastapi",
+  "lambda" : "fastapi-lambda"
+}
+
+# ECS Configuration
+alb_name                       = "test-alb"
+https_enabled                  = false
+ecs_cluster_name               = "test-cluster"
+container_name                 = "fastapi"
+container_port                 = 8000
+container_health_check_command = "curl -f http://localhost:8000/ || exit 1"
+
+# GitHub Actions Configuration
 github_oidc_provider = {
   url            = "https://token.actions.githubusercontent.com"
   client_id_list = ["sts.amazonaws.com"]
