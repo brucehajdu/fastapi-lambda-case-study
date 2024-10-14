@@ -24,17 +24,17 @@ variable "encryption_type" {
 variable "lifecycle_policy" {
   description = "The lifecycle policy for the repository"
   type        = map(any)
-  default     = {
+  default = {
     rules = [
       {
         rulePriority = 1
         description  = "Keep only the 10 most recent images"
-        selection    = {
-          tagStatus     = "any"
-          countType     = "imageCountMoreThan"
-          countNumber   = 10
+        selection = {
+          tagStatus   = "any"
+          countType   = "imageCountMoreThan"
+          countNumber = 10
         }
-        action       = {
+        action = {
           type = "expire"
         }
       }

@@ -41,7 +41,7 @@ module "cluster" {
 module "service" {
   source = "./service"
 
-  for_each = { for k, v in var.services : k => v }
+  for_each       = { for k, v in var.services : k => v }
   create_service = try(each.value.create_service, true)
 
   # Service

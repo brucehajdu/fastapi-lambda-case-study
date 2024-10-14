@@ -3,8 +3,8 @@ vpc_cidr_block   = "10.0.0.0/20"
 ecs_cluster_name = "test-cluster"
 alb_name         = "test-alb"
 
-container_name = "canary"
-container_port = 8000
+container_name                 = "canary"
+container_port                 = 8000
 container_health_check_command = "curl -f http://localhost:8000/ || exit 1"
 
 vpc_endpoints = [
@@ -36,8 +36,8 @@ ecr_repositories = [
 ]
 
 github_oidc_provider = {
-  url = "https://token.actions.githubusercontent.com"
-  client_id_list = [ "sts.amazonaws.com" ]
+  url            = "https://token.actions.githubusercontent.com"
+  client_id_list = ["sts.amazonaws.com"]
   thumbprint_list = [
     "9e99a48a9960b14926bb7f3b02e22da2b0ab7280",
     "74f3a68f16524f15424927704c9506f55a9316bd",
@@ -49,6 +49,6 @@ github_oidc_provider = {
 gha_iam_role = {
   name                = "gha-iam-role"
   role_description    = "GitHub Actions - Allow build and push to ECR"
-  github_repos        = [ "repo:brucehajdu/fastapi-lambda-case-study:*" ]
-  managed_policy_arns = [ "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"]
+  github_repos        = ["repo:brucehajdu/fastapi-lambda-case-study:*"]
+  managed_policy_arns = ["arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"]
 }

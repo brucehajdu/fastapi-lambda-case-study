@@ -15,29 +15,29 @@ variable "vpc_cidr_block" {
 
 variable "github_oidc_provider" {
   description = "GitHub OIDC provider configuration"
-  type        = object({
-    url            = string
-    client_id_list = list(string)
+  type = object({
+    url             = string
+    client_id_list  = list(string)
     thumbprint_list = list(string)
   })
 }
 
 variable "gha_iam_role" {
   description = "GitHub Actions IAM role configuration"
-  type        = object({
-    name                   = string
-    role_description       = string
-    github_repos           = list(string)
-    managed_policy_arns    = list(string)
+  type = object({
+    name                = string
+    role_description    = string
+    github_repos        = list(string)
+    managed_policy_arns = list(string)
   })
 }
 
 variable "subnet_config" {
   description = "The configuration for the subnets"
-  type        = map(object({
-      public_cidr_block  = string
-      private_cidr_block = string
-      az                 = string
+  type = map(object({
+    public_cidr_block  = string
+    private_cidr_block = string
+    az                 = string
   }))
 }
 

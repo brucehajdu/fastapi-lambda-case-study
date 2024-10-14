@@ -1,10 +1,10 @@
 variable "cidr_block" {
-  type = string
+  type        = string
   description = "The CIDR range for the VPC"
 }
 
 variable "vpc_name" {
-  type = string
+  type        = string
   description = "The name of the VPC"
 }
 
@@ -17,6 +17,6 @@ variable "subnet_config" {
 }
 
 variable "vpc_endpoints" {
-  type = list(string)
+  type        = list(string)
   description = "A list of VPC endpoints to create"
 }

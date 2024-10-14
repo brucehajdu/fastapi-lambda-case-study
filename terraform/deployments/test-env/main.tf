@@ -1,10 +1,10 @@
 module "vpc" {
   source = "../../modules/vpc"
 
-  vpc_name        = var.vpc_name
-  cidr_block      = var.vpc_cidr_block
-  subnet_config   = var.subnet_config
-  vpc_endpoints   = var.vpc_endpoints
+  vpc_name      = var.vpc_name
+  cidr_block    = var.vpc_cidr_block
+  subnet_config = var.subnet_config
+  vpc_endpoints = var.vpc_endpoints
 }
 
 module "ecr_repositories" {
@@ -23,12 +23,12 @@ module "github_oidc_provider" {
 }
 
 module "gha_iam_role" {
-  source = "../../modules/iam/role"
+  source                = "../../modules/iam/role"
   name                  = var.gha_iam_role.name
   role_description      = var.gha_iam_role.role_description
   policy_document_count = 0
   managed_policy_arns   = var.gha_iam_role.managed_policy_arns
-  assume_role_actions = ["sts:AssumeRoleWithWebIdentity"]
+  assume_role_actions   = ["sts:AssumeRoleWithWebIdentity"]
 
   principals = {
     "Federated" = [
@@ -37,9 +37,9 @@ module "gha_iam_role" {
   }
 
   assume_role_conditions = [{
-      test     = "StringLike"
-      variable = "token.actions.githubusercontent.com:sub"
-      values   = var.gha_iam_role.github_repos
+    test     = "StringLike"
+    variable = "token.actions.githubusercontent.com:sub"
+    values   = var.gha_iam_role.github_repos
     },
     {
       test     = "StringEquals"
@@ -52,9 +52,9 @@ module "gha_iam_role" {
 module "alb" {
   source = "../../modules/alb"
 
-  alb_name        = var.alb_name
-  vpc_id          = module.vpc.vpc_id
-  subnet_ids      = module.vpc.public_subnet_ids
+  alb_name   = var.alb_name
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.vpc.public_subnet_ids
 }
 
 module "ecs_cluster" {
@@ -66,14 +66,14 @@ module "ecs_cluster" {
     FARGATE = {
       default_capacity_provider_strategy = {
         weight = 100
-        base   = 2
+        base   = 1
       }
     }
   }
 
   services = {
     fastapi = {
-      cpu = 256
+      cpu    = 256
       memory = 1024
 
       enable_cloudwatch_logging   = true
@@ -110,8 +110,8 @@ module "ecs_cluster" {
       container_definitions = {
         (var.container_name) = {
           create_cloudwatch_log_group = true
-          enable_cloudwatch_logging = true
-          image = "${module.ecr_repositories["fastapi"].repository_url}:latest"
+          enable_cloudwatch_logging   = true
+          image                       = "${module.ecr_repositories["fastapi"].repository_url}:latest"
           port_mappings = [
             {
               containerPort = var.container_port
@@ -126,12 +126,42 @@ module "ecs_cluster" {
 
           health_check = {
             command = ["CMD-SHELL", var.container_health_check_command]
-            interval = 5
-            timeout  = 5
-            retries  = 3
           }
         }
       }
     }
+  }
+}
+
+module "lambda_role" {
+  source = "../../modules/iam/role"
+
+  name                  = "test-lambda-role"
+  role_description      = "IAM role for Lambda function"
+  assume_role_actions   = ["sts:AssumeRole"]
+  policy_document_count = 0
+
+  principals = {
+    "Service" = ["lambda.amazonaws.com"]
+  }
+
+  managed_policy_arns = [
+    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+    "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+  ]
+}
+
+module "lambda" {
+  source = "../../modules/lambda"
+
+  function_name = "test-lambda"
+  role_arn      = module.lambda_role.arn
+  image_uri     = "${module.ecr_repositories["fastapi-lambda"].repository_url}:latest"
+
+  subnet_ids = module.vpc.private_subnet_ids
+  vpc_id     = module.vpc.vpc_id
+
+  environment_variables = {
+    "ENVIRONMENT" = "test"
   }
 }

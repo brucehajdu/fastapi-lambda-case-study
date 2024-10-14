@@ -18,26 +18,26 @@ resource "aws_alb_listener" "http" {
 }
 
 resource "aws_alb_target_group" "this" {
-  name     = var.alb_name
-  port     = 80
-  protocol = "HTTP"
+  name        = var.alb_name
+  port        = 80
+  protocol    = "HTTP"
   target_type = "ip"
-  vpc_id   = var.vpc_id
+  vpc_id      = var.vpc_id
 }
 
 resource "aws_security_group" "this" {
   vpc_id = var.vpc_id
 
   ingress {
-    from_port = 80
-    to_port   = 80
-    protocol  = "TCP"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "TCP"
     cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
-    from_port = 0
-    to_port   = 0
-    protocol  = "-1"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
