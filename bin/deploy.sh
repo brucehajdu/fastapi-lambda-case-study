@@ -3,7 +3,7 @@
 set -euo pipefail
 
 check_aws_sso_login() {
-  if ! aws sso list-accounts --max-results 1 &> /dev/null; then
+  if ! aws s3 ls &> /dev/null; then
     echo "AWS SSO login required. Initiating login..."
     aws sso login
     echo "Waiting for AWS SSO login to complete..."
@@ -80,6 +80,10 @@ trigger_gha() {
 check_aws_sso_login
 ACTION=${1:-}
 if [ "$ACTION" == "-destroy" ]; then
+  # Empty the S3 bucket and ECR repos before performing the destroy
+  aws s3 rm s3://reorg-bhajdu-case-study --recursive
+  aws ecr batch-delete-image --repository-name fastapi --image-ids "$(aws ecr list-images --repository-name fastapi --query 'imageIds[*]' --output json)" || echo "No images to delete"
+  aws ecr batch-delete-image --repository-name fastapi-lambda --image-ids "$(aws ecr list-images --repository-name fastapi-lambda --query 'imageIds[*]' --output json)" || echo "No images to delete"
   destroy_terraform
 else
   check_gh_login

@@ -48,11 +48,42 @@ module "github_oidc_provider" {
   thumbprint_list = var.github_oidc_provider.thumbprint_list
 }
 
+data "aws_iam_policy_document" "ecs_lambda_allow" {
+  statement {
+    actions = [
+      "ecs:UpdateService",
+      "ecs:RegisterTaskDefinition",
+      "ecs:DescribeServices",
+      "ecs:ListTasks",
+      "ecs:StopTask"
+    ]
+
+    resources = [
+      module.ecs_cluster.cluster_arn,
+      "${module.ecs_cluster.cluster_arn}/${module.ecs_cluster.services["fastapi"].name}",
+      module.ecs_cluster.services["fastapi"].task_definition_arn
+    ]
+  }
+
+  statement {
+    actions = [
+      "lambda:UpdateFunctionCode",
+      "lambda:PublishVersion",
+      "lambda:GetFunction",
+      "lambda:InvokeFunction"
+    ]
+
+    resources = [
+      module.lambda.lambda_arn
+    ]
+  }
+}
+
 module "gha_iam_role" {
   source                = "../../modules/iam/role"
   name                  = var.gha_iam_role.name
   role_description      = var.gha_iam_role.role_description
-  policy_document_count = 0
+  policy_document_count = 2
   managed_policy_arns   = var.gha_iam_role.managed_policy_arns
   assume_role_actions   = ["sts:AssumeRoleWithWebIdentity"]
 
@@ -72,6 +103,10 @@ module "gha_iam_role" {
       variable = "token.actions.githubusercontent.com:aud"
       values   = ["sts.amazonaws.com"]
     }
+  ]
+
+  policy_documents = [
+    data.aws_iam_policy_document.ecs_lambda_allow.json,
   ]
 }
 
@@ -192,7 +227,7 @@ data "aws_iam_policy_document" "lambda_s3_access" {
 module "lambda_role" {
   source = "../../modules/iam/role"
 
-  name                  = "test-lambda-role"
+  name                  = "${module.ecr_repositories["lambda"].repository_name}-role"
   role_description      = "IAM role for Lambda function"
   assume_role_actions   = ["sts:AssumeRole"]
   policy_document_count = 1
@@ -214,7 +249,7 @@ module "lambda_role" {
 module "lambda" {
   source = "../../modules/lambda"
 
-  function_name = "test-lambda"
+  function_name = module.ecr_repositories["lambda"].repository_name
   role_arn      = module.lambda_role.arn
   image_uri     = local.lambda_repo_url
 

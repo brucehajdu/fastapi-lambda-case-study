@@ -1,5 +1,5 @@
 # VPC Configuration
-vpc_name       = "test-vpc"
+vpc_name       = "fastapi-vpc"
 vpc_cidr_block = "10.0.0.0/20"
 vpc_endpoints  = ["ecr.api", "ecr.dkr", "ecs", "ecs-agent", "ecs-telemetry", "lambda", "s3"]
 
