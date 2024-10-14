@@ -71,16 +71,20 @@ This will create the necessary AWS resources, including the VPC, ECS cluster, Fa
 
 The project includes GitHub Actions workflows to automate the build and deployment process. The workflows are defined in the `.github/workflows` directory.
 
-- `build_fast_api.yaml`: Triggers on pushes to the `main` branch and builds and pushes the FastAPI Docker image to Amazon ECR.
-- `build_lambda.yaml`: Triggers on pushes to the `main` branch and builds and pushes the Lambda Docker image to Amazon ECR.
-- `build_and_push_to_ecr.yaml`: A reusable workflow to build and push Docker images to Amazon ECR.
+- `build_fast_api.yaml`: Manually triggered, builds and pushes the FastAPI Docker image to Amazon ECR.
+- `build_lambda.yaml`: Manually triggered, builds and pushes the Lambda Docker image to Amazon ECR.
+- `build_and_push_to_ecr.yaml`: A reusable generic workflow, used by the above jobs, to build and push Docker images to Amazon ECR.
+- `build_and_deploy_fastapi_service.yaml`: Triggers on pushes to the `main` branch and changes to the `api/` folder, deploys the FastAPI ECS service.
+- `build_and_deploy_lambda.yaml`: Triggers on pushes to the `main` branch and changes to the `lambda/` folder, deploys the Lambda function.
+- `deploy_fastapi_service.yaml`: Manually triggered, deploys the FastAPI ECS service.
+- `deploy_lambda.yaml`: Manually triggered, deploys the Lambda function.
 - `run_pytests.yaml`: Triggers on pull requests to the `main` branch and runs the test suite using Pytest.
 
-The workflows will be kicked off using `bin/deploy.sh` when automatically deploying the environment.
+The `build_*` type workflows will be kicked off using `bin/deploy.sh` when automatically deploying the environment.  This is necessary to allow the ECS and Lambda services to bootstrap properly.
 
 ## Notes
 
 - The FastAPI application is accessible via HTTP at the public DNS name of the ALB at https://us-east-1.console.aws.amazon.com/ec2/home?region=us-east-1#LoadBalancers: (change the region in the URL if required)
 - Deploying the infrastructure will incur costs (Roughly \$2-\$3 per day). Be sure to tear down the environment when you're done.
 - Tearing down the entire environment may take a while due to the ENIs attached to the lambda (AWS does not release those from the lambda for several minutes).  Terraform may time out if your timeout settings are too short.
-- The ECR repositories will not be deleted when tearing down the environment **unless** the images pushed from GHA are fully deleted from the repositories first.
+- The ECR repositories and S3 bucket will not be deleted when tearing down the environment **unless** the images pushed from GHA and any S3 objects are fully deleted from the repositories/bucket first.  
