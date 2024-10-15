@@ -6,12 +6,11 @@ This project is a case study demonstrating the deployment of a simple FastAPI ap
 
 ## Prerequisites
 
-- Python 3.11
+- Python (Tested on 3.11)
 - Docker
-- AWS CLI
-- GitHub CLI (`gh`)
+- AWS CLI with single sign-on (SSO) configured (required for deploy script, not for Terraform)
+- GitHub CLI (required for deploy script to kick off GitHub Actions workflows)
 - Terraform
-- GitHub Actions
 
 ## Usage
 
@@ -19,7 +18,7 @@ This project is a case study demonstrating the deployment of a simple FastAPI ap
 
 To deploy the environment automatically, you can use the script located in `bin/deploy.sh`. 
 
-This script will build the Docker images, push them to Amazon ECR, and deploy the infrastructure using Terraform. It will also allow you to tear the environment down when you're done.
+This script will deploy some initial Terraform for the ECR repos, build the Docker images, push them to ECR, and deploy the rest of the infrastructure. It will also allow you to tear the environment down when you're done.
 
 To deploy or tear down the environment, run the following command:
 
@@ -51,7 +50,7 @@ docker build -t fastapi-lambda:latest .
 
 ### Deploy Terraform
 
-To deploy the infrastructure using Terraform, follow these steps:
+To deploy the infrastructure using Terraform, or in case of issues with the automated deployment script, follow these steps:
 
 ```sh
 # Deploy the bootstrapping code for the remote state
