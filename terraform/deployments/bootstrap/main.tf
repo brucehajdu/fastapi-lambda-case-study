@@ -1,5 +1,5 @@
-# Put anything that's not an output or variable here
 resource "aws_s3_bucket" "terraform_state" {
+  # Change this bucket name to something unique
   bucket = "reorg-bhajdu-tfstate"
 }
 
