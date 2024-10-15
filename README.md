@@ -55,7 +55,7 @@ docker build -t fastapi:latest .
 **Lambda Function**
 
 ```sh
-cd api/
+cd lambda/
 docker build -t fastapi-lambda:latest .
 ```
 
